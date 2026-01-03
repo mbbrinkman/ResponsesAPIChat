@@ -1023,19 +1023,90 @@
 
                 <h4>OpenRouter Responses API Parameters (All Optional)</h4>
                 <p>Customize your model behavior with these parameters (set to null to use defaults):</p>
+
+                <h5 style="margin-top: 16px; color: #4a9eff;">Sampling Parameters</h5>
                 <ul>
-                    <li><code>temperature</code> (0.0-2.0): Randomness/creativity level</li>
-                    <li><code>max_output_tokens</code>: Maximum response length</li>
-                    <li><code>top_p</code> (0.0-1.0): Nucleus sampling threshold</li>
-                    <li><code>frequency_penalty</code> (-2.0 to 2.0): Reduce word repetition</li>
-                    <li><code>presence_penalty</code> (-2.0 to 2.0): Encourage topic diversity</li>
-                    <li><code>seed</code>: For deterministic outputs</li>
-                    <li><code>logit_bias</code>: Adjust token probabilities</li>
-                    <li><code>stop</code>: Array of stop sequences</li>
-                    <li><code>tools</code>: Function calling definitions</li>
-                    <li><code>tool_choice</code>: Force or disable tool use</li>
-                    <li><code>reasoning</code>: Enable extended thinking/reasoning for O1+ models</li>
-                    <li><code>text</code>: Configure text output format (e.g., {"format": {"type": "json_object"}})</li>
+                    <li><code>temperature</code> (0.0-2.0): Randomness/creativity level. Lower = more deterministic, higher = more creative.</li>
+                    <li><code>max_output_tokens</code>: Maximum tokens in response. Set based on expected response length.</li>
+                    <li><code>top_p</code> (0.0-1.0): Nucleus sampling - limits choices to tokens whose probabilities sum to P.</li>
+                    <li><code>top_k</code>: Limits choices to top K most likely tokens. Value of 1 = always pick most likely.</li>
+                    <li><code>frequency_penalty</code> (-2.0 to 2.0): Reduce word repetition based on frequency in text.</li>
+                    <li><code>presence_penalty</code> (-2.0 to 2.0): Encourage topic diversity by penalizing tokens already present.</li>
+                    <li><code>seed</code>: Integer for deterministic/reproducible outputs (not guaranteed for all models).</li>
+                    <li><code>stop</code>: Array of sequences that will stop generation (e.g., ["END", "\n\n"]).</li>
+                </ul>
+
+                <h5 style="margin-top: 16px; color: #4a9eff;">Tool Calling</h5>
+                <ul>
+                    <li><code>tools</code>: Array of function definitions the model can call. Each tool has type, name, description, and parameters.</li>
+                    <li><code>tool_choice</code>: Control tool usage - "auto" (model decides), "none" (disabled), "required" (must use), or specific tool object.</li>
+                    <li><code>parallel_tool_calls</code>: Boolean to allow/disallow simultaneous tool invocations.</li>
+                </ul>
+
+                <h5 style="margin-top: 16px; color: #4a9eff;">Output Format</h5>
+                <ul>
+                    <li><code>text</code>: Configure output format. Options:
+                        <ul style="margin-top: 4px;">
+                            <li><code>{"format": {"type": "text"}}</code> - Default text output</li>
+                            <li><code>{"format": {"type": "json_object"}}</code> - JSON mode</li>
+                            <li><code>{"format": {"type": "json_schema", "name": "...", "schema": {...}}}</code> - Structured output</li>
+                            <li><code>{"verbosity": "low"|"medium"|"high"}</code> - Control response length</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h5 style="margin-top: 16px; color: #4a9eff;">Reasoning/Extended Thinking</h5>
+                <ul>
+                    <li><code>reasoning</code>: Configure extended thinking for supported models (O1, Claude, etc.):
+                        <ul style="margin-top: 4px;">
+                            <li><code>effort</code>: "none" | "minimal" | "low" | "medium" | "high" | "xhigh"</li>
+                            <li><code>summary</code>: "auto" | "concise" | "detailed"</li>
+                            <li><code>max_tokens</code>: Limit reasoning tokens</li>
+                            <li><code>enabled</code>: Boolean to enable/disable</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h5 style="margin-top: 16px; color: #4a9eff;">Provider Routing</h5>
+                <ul>
+                    <li><code>provider</code>: Control which providers handle your request:
+                        <ul style="margin-top: 4px;">
+                            <li><code>allow_fallbacks</code>: Boolean (default: true) - Allow fallback to other providers</li>
+                            <li><code>require_parameters</code>: Boolean - Only route to providers supporting all params</li>
+                            <li><code>data_collection</code>: "allow" | "deny" - Control data collection</li>
+                            <li><code>zdr</code>: Boolean - Restrict to Zero Data Retention endpoints</li>
+                            <li><code>order</code>: Array of provider slugs for preference order</li>
+                            <li><code>only</code>: Array of provider slugs to exclusively use</li>
+                            <li><code>ignore</code>: Array of provider slugs to avoid</li>
+                            <li><code>quantizations</code>: Array of acceptable quantizations ("int4", "int8", "fp8", "fp16", etc.)</li>
+                            <li><code>sort</code>: "price" | "throughput" | "latency" - How to rank providers</li>
+                            <li><code>max_price</code>: {prompt, completion, image, request} - Price limits per million tokens</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h5 style="margin-top: 16px; color: #4a9eff;">Plugins</h5>
+                <ul>
+                    <li><code>plugins</code>: Array of optional plugins:
+                        <ul style="margin-top: 4px;">
+                            <li><code>{"id": "web"}</code> - Web search plugin with options: enabled, max_results, search_prompt, engine ("native"|"exa")</li>
+                            <li><code>{"id": "moderation"}</code> - Content moderation plugin</li>
+                            <li><code>{"id": "file-parser"}</code> - File parsing with pdf engine options ("mistral-ocr"|"pdf-text"|"native")</li>
+                            <li><code>{"id": "response-healing"}</code> - Auto-fix malformed responses</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h5 style="margin-top: 16px; color: #4a9eff;">Tracking & Storage</h5>
+                <ul>
+                    <li><code>user</code>: End-user identifier (max 128 chars) for abuse tracking.</li>
+                    <li><code>session_id</code>: Unique ID (max 128 chars) for grouping related requests.</li>
+                    <li><code>store</code>: Boolean - Store conversation server-side for future reference.</li>
+                    <li><code>metadata</code>: Object with custom key-value string pairs for your tracking.</li>
+                </ul>
+
+                <h5 style="margin-top: 16px; color: #4a9eff;">Other</h5>
+                <ul>
                     <li><code>timeout</code>: Request timeout in milliseconds (default: 120000 = 2 minutes). Increase for reasoning models.</li>
                 </ul>
 
@@ -1076,7 +1147,7 @@
 
                 <h3>Source Code & License</h3>
                 <p>This application is open source and available on GitHub:</p>
-                <p><a href="https://github.com/mbbrinkman/my_api_chat" target="_blank" style="color: #4a9eff;">https://github.com/mbbrinkman/my_api_chat</a></p>
+                <p><a href="https://github.com/mbbrinkman/ResponsesAPIChat" target="_blank" style="color: #4a9eff;">https://github.com/mbbrinkman/ResponsesAPIChat</a></p>
                 <p><strong>License:</strong> CC0 (Public Domain)</p>
                 <p>You are free to use, modify, distribute, and do basically whatever you want with this code. No attribution required.</p>
             </div>
@@ -1704,15 +1775,23 @@ ${apiKeyRef},
 "system_prompt": "",
 "max_output_tokens": null,
 "temperature": 1.0,
-"top_p": 1.0,
-"frequency_penalty": 0,
-"presence_penalty": 0,
+"top_p": null,
+"top_k": null,
+"frequency_penalty": null,
+"presence_penalty": null,
 "seed": null,
 "stop": null,
 "tools": null,
 "tool_choice": null,
+"parallel_tool_calls": null,
 "reasoning": null,
 "text": null,
+"user": null,
+"session_id": null,
+"store": null,
+"metadata": null,
+"provider": null,
+"plugins": null,
 "timeout": 120000`;
         }
 
