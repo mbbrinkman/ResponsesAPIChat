@@ -3795,6 +3795,10 @@ ${apiKeyRef},
                     throw new Error(`${model.name} hit token limit before responding. Try reducing message history or increasing max_output_tokens.`);
                 } else if (finishReason === 'stop') {
                     throw new Error(`${model.name} stopped immediately without generating content. This may indicate:\n• Content filtering or safety refusal\n• Prompt formatting issues\n• Model configuration problems (check max_output_tokens, temperature)\n• API or model instability\n\nTry:\n• Rephrasing your message\n• Clearing conversation history\n• Using a different model`);
+                } else if (finishReason === 'completed' || finishReason === 'done') {
+                    // Model sent completion signal without new content - silently ignore
+                    // This can happen with some models after they finish responding
+                    return;
                 } else if (finishReason) {
                     throw new Error(`${model.name} stopped with reason: ${finishReason} (no content generated)`);
                 } else {
